@@ -4,19 +4,25 @@ from django.core.mail import send_mail
 from rest_framework import filters, permissions, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
-from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,
-                                   HTTP_404_NOT_FOUND)
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+)
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .permissions import IsAdministrator
 from .models import User
-from .serializers import (ApiLoginSerializer, RegisterUserSerializer,
-                          UserListSerializer)
+from .permissions import IsAdministrator
+from .serializers import (
+    ApiLoginSerializer,
+    RegisterUserSerializer,
+    UserListSerializer,
+)
 
 
 class RegisterUserView(APIView):
-    http_method_names = ['post']
+    http_method_names = ["post"]
     permission_classes = (permissions.AllowAny,)
 
     def post(self, *args, **kwargs):
@@ -25,13 +31,13 @@ class RegisterUserView(APIView):
             confirmation_code = randint(0, 10000)
             User.objects.create_user(
                 **serializer.validated_data,
-                confirmation_code=confirmation_code
+                confirmation_code=confirmation_code,
             )
             send_mail(
-                'Ваш ключ для регистрации',
-                f'Код: {confirmation_code}',
-                'from@example.com',
-                [serializer.validated_data['email']],
+                "Ваш ключ для регистрации",
+                f"Код: {confirmation_code}",
+                "from@example.com",
+                [serializer.validated_data["email"]],
                 fail_silently=False,
             )
             return Response(serializer.data, status=HTTP_200_OK)
@@ -39,14 +45,14 @@ class RegisterUserView(APIView):
 
 
 class LoginApiView(APIView):
-    http_method_names = ['post']
+    http_method_names = ["post"]
     permission_classes = (permissions.AllowAny,)
 
     def post(self, *args, **kwargs):
         serializer = ApiLoginSerializer(data=self.request.data)
         if serializer.is_valid():
-            confirmation_code = serializer.validated_data['confirmation_code']
-            username = serializer.validated_data['username']
+            confirmation_code = serializer.validated_data["confirmation_code"]
+            username = serializer.validated_data["username"]
             try:
                 user = User.objects.get(username=username)
             except User.DoesNotExist:
@@ -55,8 +61,8 @@ class LoginApiView(APIView):
                 return Response(status=HTTP_400_BAD_REQUEST)
             refresh = RefreshToken.for_user(user)
             result = {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token)
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
             }
             return Response(status=HTTP_200_OK, data=result)
         return Response(status=HTTP_400_BAD_REQUEST, data=serializer.errors)
@@ -68,8 +74,8 @@ class UsersListView(viewsets.ModelViewSet):
     permission_classes = (IsAdministrator,)
     pagination_class = LimitOffsetPagination
     page_size = 5
-    lookup_field = 'username'
-    search_fields = ('username',)
+    lookup_field = "username"
+    search_fields = ("username",)
     filter_backends = (filters.SearchFilter,)
 
 
@@ -82,10 +88,7 @@ class UserView(APIView):
 
     def patch(self, request, *args, **kwargs):
         serializer = UserListSerializer(
-            request.user,
-            data=request.data,
-            partial=True,
-            many=False
+            request.user, data=request.data, partial=True, many=False
         )
         if serializer.is_valid():
             serializer.save(role=request.user.role)
