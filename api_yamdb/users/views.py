@@ -4,21 +4,15 @@ from django.core.mail import send_mail
 from rest_framework import filters, permissions, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
-from rest_framework.status import (
-    HTTP_200_OK,
-    HTTP_400_BAD_REQUEST,
-    HTTP_404_NOT_FOUND,
-)
+from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,
+                                   HTTP_404_NOT_FOUND)
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
 from .permissions import IsAdministrator
-from .serializers import (
-    ApiLoginSerializer,
-    RegisterUserSerializer,
-    UserListSerializer,
-)
+from .serializers import (ApiLoginSerializer, RegisterUserSerializer,
+                          UserListSerializer)
 
 
 class RegisterUserView(APIView):
